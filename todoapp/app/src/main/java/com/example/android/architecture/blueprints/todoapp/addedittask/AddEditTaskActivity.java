@@ -16,12 +16,10 @@
 
 package com.example.android.architecture.blueprints.todoapp.addedittask;
 
-import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -30,14 +28,26 @@ import com.example.android.architecture.blueprints.todoapp.R;
 import com.example.android.architecture.blueprints.todoapp.ViewModelFactory;
 import com.example.android.architecture.blueprints.todoapp.util.ActivityUtils;
 
+import javax.inject.Inject;
+
+import dagger.android.DispatchingAndroidInjector;
+import dagger.android.support.HasSupportFragmentInjector;
+
 /**
  * Displays an add or edit task screen.
  */
-public class AddEditTaskActivity extends AppCompatActivity implements AddEditTaskNavigator {
+public class AddEditTaskActivity extends AppCompatActivity implements HasSupportFragmentInjector, AddEditTaskNavigator {
 
     public static final int REQUEST_CODE = 1;
 
     public static final int ADD_EDIT_RESULT_OK = RESULT_FIRST_USER + 1;
+
+    @Inject
+    DispatchingAndroidInjector<Fragment> dispatchingAndroidInjector;
+
+    // Use a Factory to inject dependencies into the ViewModel
+    @Inject
+    ViewModelFactory mFactory;
 
     @Override
     public boolean onSupportNavigateUp() {
@@ -72,22 +82,10 @@ public class AddEditTaskActivity extends AppCompatActivity implements AddEditTas
     }
 
     private void subscribeToNavigationChanges() {
-        AddEditTaskViewModel viewModel = obtainViewModel(this);
+        AddEditTaskViewModel viewModel = ViewModelProviders.of(this, mFactory).get(AddEditTaskViewModel.class);
 
         // The activity observes the navigation events in the ViewModel
-        viewModel.getTaskUpdatedEvent().observe(this, new Observer<Void>() {
-            @Override
-            public void onChanged(@Nullable Void _) {
-                AddEditTaskActivity.this.onTaskSaved();
-            }
-        });
-    }
-
-    public static AddEditTaskViewModel obtainViewModel(FragmentActivity activity) {
-        // Use a Factory to inject dependencies into the ViewModel
-        ViewModelFactory factory = ViewModelFactory.getInstance(activity.getApplication());
-
-        return ViewModelProviders.of(activity, factory).get(AddEditTaskViewModel.class);
+        viewModel.getTaskUpdatedEvent().observe(this, t-> AddEditTaskActivity.this.onTaskSaved());
     }
 
     @NonNull
@@ -106,5 +104,10 @@ public class AddEditTaskActivity extends AppCompatActivity implements AddEditTas
             addEditTaskFragment.setArguments(bundle);
         }
         return addEditTaskFragment;
+    }
+
+    @Override
+    public DispatchingAndroidInjector<Fragment> supportFragmentInjector() {
+        return dispatchingAndroidInjector;
     }
 }

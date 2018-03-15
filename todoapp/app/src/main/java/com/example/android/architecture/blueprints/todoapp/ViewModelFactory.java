@@ -16,11 +16,9 @@
 
 package com.example.android.architecture.blueprints.todoapp;
 
-import android.annotation.SuppressLint;
 import android.app.Application;
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
-import android.support.annotation.VisibleForTesting;
 
 import com.example.android.architecture.blueprints.todoapp.addedittask.AddEditTaskViewModel;
 import com.example.android.architecture.blueprints.todoapp.data.source.TasksRepository;
@@ -28,40 +26,24 @@ import com.example.android.architecture.blueprints.todoapp.statistics.Statistics
 import com.example.android.architecture.blueprints.todoapp.taskdetail.TaskDetailViewModel;
 import com.example.android.architecture.blueprints.todoapp.tasks.TasksViewModel;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * A creator is used to inject the product ID into the ViewModel
  * <p>
  * This creator is to showcase how to inject dependencies into ViewModels. It's not
  * actually necessary in this case, as the product ID can be passed in a public method.
  */
+@Singleton
 public class ViewModelFactory extends ViewModelProvider.NewInstanceFactory {
-
-    @SuppressLint("StaticFieldLeak")
-    private static volatile ViewModelFactory INSTANCE;
 
     private final Application mApplication;
 
     private final TasksRepository mTasksRepository;
 
-    public static ViewModelFactory getInstance(Application application) {
-
-        if (INSTANCE == null) {
-            synchronized (ViewModelFactory.class) {
-                if (INSTANCE == null) {
-                    INSTANCE = new ViewModelFactory(application,
-                            Injection.provideTasksRepository(application.getApplicationContext()));
-                }
-            }
-        }
-        return INSTANCE;
-    }
-
-    @VisibleForTesting
-    public static void destroyInstance() {
-        INSTANCE = null;
-    }
-
-    private ViewModelFactory(Application application, TasksRepository repository) {
+    @Inject
+    public ViewModelFactory(Application application, TasksRepository repository) {
         mApplication = application;
         mTasksRepository = repository;
     }

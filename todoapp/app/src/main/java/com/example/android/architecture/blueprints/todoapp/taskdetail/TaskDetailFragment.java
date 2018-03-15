@@ -16,6 +16,7 @@
 
 package com.example.android.architecture.blueprints.todoapp.taskdetail;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
@@ -31,20 +32,28 @@ import android.widget.CheckBox;
 
 import com.example.android.architecture.blueprints.todoapp.R;
 import com.example.android.architecture.blueprints.todoapp.SnackbarMessage;
+import com.example.android.architecture.blueprints.todoapp.ViewModelFactory;
 import com.example.android.architecture.blueprints.todoapp.databinding.TaskdetailFragBinding;
+import com.example.android.architecture.blueprints.todoapp.di.Injectable;
 import com.example.android.architecture.blueprints.todoapp.util.SnackbarUtils;
+
+import javax.inject.Inject;
 
 
 /**
  * Main UI for the task detail screen.
  */
-public class TaskDetailFragment extends Fragment {
+public class TaskDetailFragment extends Fragment implements Injectable {
 
     public static final String ARGUMENT_TASK_ID = "TASK_ID";
 
     public static final int REQUEST_EDIT_TASK = 1;
 
     private TaskDetailViewModel mViewModel;
+
+    // Use a Factory to inject dependencies into the ViewModel
+    @Inject
+    ViewModelFactory mFactory;
 
     public static TaskDetailFragment newInstance(String taskId) {
         Bundle arguments = new Bundle();
@@ -77,12 +86,7 @@ public class TaskDetailFragment extends Fragment {
         FloatingActionButton fab =
                 (FloatingActionButton) getActivity().findViewById(R.id.fab_edit_task);
 
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mViewModel.editTask();
-            }
-        });
+        fab.setOnClickListener(v ->mViewModel.editTask());
     }
 
     @Override
@@ -100,7 +104,7 @@ public class TaskDetailFragment extends Fragment {
 
         TaskdetailFragBinding viewDataBinding = TaskdetailFragBinding.bind(view);
 
-        mViewModel = TaskDetailActivity.obtainViewModel(getActivity());
+        mViewModel = ViewModelProviders.of(getActivity(), mFactory).get(TaskDetailViewModel.class);
 
         viewDataBinding.setViewmodel(mViewModel);
 
@@ -114,12 +118,7 @@ public class TaskDetailFragment extends Fragment {
     }
 
     private TaskDetailUserActionsListener getTaskDetailUserActionsListener() {
-        return new TaskDetailUserActionsListener() {
-            @Override
-            public void onCompleteChanged(View v) {
-                mViewModel.setCompleted(((CheckBox) v).isChecked());
-            }
-        };
+        return  v -> mViewModel.setCompleted(((CheckBox) v).isChecked());
     }
 
     @Override

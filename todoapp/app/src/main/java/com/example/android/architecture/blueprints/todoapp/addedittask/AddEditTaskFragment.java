@@ -16,6 +16,7 @@
 
 package com.example.android.architecture.blueprints.todoapp.addedittask;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
@@ -29,19 +30,27 @@ import android.view.ViewGroup;
 
 import com.example.android.architecture.blueprints.todoapp.R;
 import com.example.android.architecture.blueprints.todoapp.SnackbarMessage;
+import com.example.android.architecture.blueprints.todoapp.ViewModelFactory;
 import com.example.android.architecture.blueprints.todoapp.databinding.AddtaskFragBinding;
+import com.example.android.architecture.blueprints.todoapp.di.Injectable;
 import com.example.android.architecture.blueprints.todoapp.util.SnackbarUtils;
+
+import javax.inject.Inject;
 
 /**
  * Main UI for the add task screen. Users can enter a task title and description.
  */
-public class AddEditTaskFragment extends Fragment {
+public class AddEditTaskFragment extends Fragment implements Injectable {
 
     public static final String ARGUMENT_EDIT_TASK_ID = "EDIT_TASK_ID";
 
     private AddEditTaskViewModel mViewModel;
 
     private AddtaskFragBinding mViewDataBinding;
+
+    // Use a Factory to inject dependencies into the ViewModel
+    @Inject
+    ViewModelFactory mFactory;
 
     public static AddEditTaskFragment newInstance() {
         return new AddEditTaskFragment();
@@ -82,7 +91,7 @@ public class AddEditTaskFragment extends Fragment {
             mViewDataBinding = AddtaskFragBinding.bind(root);
         }
 
-        mViewModel = AddEditTaskActivity.obtainViewModel(getActivity());
+        mViewModel = ViewModelProviders.of(getActivity(), mFactory).get(AddEditTaskViewModel.class);
 
         mViewDataBinding.setViewmodel(mViewModel);
 

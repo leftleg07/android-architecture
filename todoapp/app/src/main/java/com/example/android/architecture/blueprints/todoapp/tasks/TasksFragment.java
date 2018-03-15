@@ -16,6 +16,7 @@
 
 package com.example.android.architecture.blueprints.todoapp.tasks;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
@@ -34,22 +35,30 @@ import android.widget.ListView;
 import com.example.android.architecture.blueprints.todoapp.R;
 import com.example.android.architecture.blueprints.todoapp.ScrollChildSwipeRefreshLayout;
 import com.example.android.architecture.blueprints.todoapp.SnackbarMessage;
+import com.example.android.architecture.blueprints.todoapp.ViewModelFactory;
 import com.example.android.architecture.blueprints.todoapp.data.Task;
 import com.example.android.architecture.blueprints.todoapp.databinding.TasksFragBinding;
+import com.example.android.architecture.blueprints.todoapp.di.Injectable;
 import com.example.android.architecture.blueprints.todoapp.util.SnackbarUtils;
 
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+
 /**
  * Display a grid of {@link Task}s. User can choose to view all, active or completed tasks.
  */
-public class TasksFragment extends Fragment {
+public class TasksFragment extends Fragment implements Injectable {
 
     private TasksViewModel mTasksViewModel;
 
     private TasksFragBinding mTasksFragBinding;
 
     private TasksAdapter mListAdapter;
+
+    // Use a Factory to inject dependencies into the ViewModel
+    @Inject
+    ViewModelFactory mFactory;
 
     public TasksFragment() {
         // Requires empty public constructor
@@ -71,7 +80,7 @@ public class TasksFragment extends Fragment {
                              Bundle savedInstanceState) {
         mTasksFragBinding = TasksFragBinding.inflate(inflater, container, false);
 
-        mTasksViewModel = TasksActivity.obtainViewModel(getActivity());
+        mTasksViewModel = ViewModelProviders.of(getActivity(), mFactory).get(TasksViewModel.class);
 
         mTasksFragBinding.setViewmodel(mTasksViewModel);
 
@@ -127,22 +136,20 @@ public class TasksFragment extends Fragment {
         PopupMenu popup = new PopupMenu(getContext(), getActivity().findViewById(R.id.menu_filter));
         popup.getMenuInflater().inflate(R.menu.filter_tasks, popup.getMenu());
 
-        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.active:
-                        mTasksViewModel.setFiltering(TasksFilterType.ACTIVE_TASKS);
-                        break;
-                    case R.id.completed:
-                        mTasksViewModel.setFiltering(TasksFilterType.COMPLETED_TASKS);
-                        break;
-                    default:
-                        mTasksViewModel.setFiltering(TasksFilterType.ALL_TASKS);
-                        break;
-                }
-                mTasksViewModel.loadTasks(false);
-                return true;
+        popup.setOnMenuItemClickListener(item -> {
+            switch (item.getItemId()) {
+                case R.id.active:
+                    mTasksViewModel.setFiltering(TasksFilterType.ACTIVE_TASKS);
+                    break;
+                case R.id.completed:
+                    mTasksViewModel.setFiltering(TasksFilterType.COMPLETED_TASKS);
+                    break;
+                default:
+                    mTasksViewModel.setFiltering(TasksFilterType.ALL_TASKS);
+                    break;
             }
+            mTasksViewModel.loadTasks(false);
+            return true;
         });
 
         popup.show();
@@ -153,16 +160,11 @@ public class TasksFragment extends Fragment {
                 (FloatingActionButton) getActivity().findViewById(R.id.fab_add_task);
 
         fab.setImageResource(R.drawable.ic_add);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mTasksViewModel.addNewTask();
-            }
-        });
+        fab.setOnClickListener(v -> mTasksViewModel.addNewTask());
     }
 
     private void setupListAdapter() {
-        ListView listView =  mTasksFragBinding.tasksList;
+        ListView listView = mTasksFragBinding.tasksList;
 
         mListAdapter = new TasksAdapter(
                 new ArrayList<Task>(0),
@@ -172,7 +174,7 @@ public class TasksFragment extends Fragment {
     }
 
     private void setupRefreshLayout() {
-        ListView listView =  mTasksFragBinding.tasksList;
+        ListView listView = mTasksFragBinding.tasksList;
         final ScrollChildSwipeRefreshLayout swipeRefreshLayout = mTasksFragBinding.refreshLayout;
         swipeRefreshLayout.setColorSchemeColors(
                 ContextCompat.getColor(getActivity(), R.color.colorPrimary),

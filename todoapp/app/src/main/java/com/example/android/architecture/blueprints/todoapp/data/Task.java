@@ -32,7 +32,7 @@ import java.util.UUID;
  * Immutable model class for a Task.
  */
 @Entity(tableName = "tasks")
-public final class Task {
+public class Task {
 
     @PrimaryKey
     @NonNull

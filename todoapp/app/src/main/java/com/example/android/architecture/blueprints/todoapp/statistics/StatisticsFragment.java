@@ -16,6 +16,7 @@
 
 package com.example.android.architecture.blueprints.todoapp.statistics;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -25,16 +26,23 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.android.architecture.blueprints.todoapp.R;
+import com.example.android.architecture.blueprints.todoapp.ViewModelFactory;
 import com.example.android.architecture.blueprints.todoapp.databinding.StatisticsFragBinding;
+import com.example.android.architecture.blueprints.todoapp.di.Injectable;
+
+import javax.inject.Inject;
 
 /**
  * Main UI for the statistics screen.
  */
-public class StatisticsFragment extends Fragment {
+public class StatisticsFragment extends Fragment implements Injectable {
 
     private StatisticsFragBinding mViewDataBinding;
 
     private StatisticsViewModel mStatisticsViewModel;
+
+    @Inject
+    ViewModelFactory mFactory;
 
     public static StatisticsFragment newInstance() {
         return new StatisticsFragment();
@@ -52,7 +60,7 @@ public class StatisticsFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mStatisticsViewModel = StatisticsActivity.obtainViewModel(getActivity());
+        mStatisticsViewModel = ViewModelProviders.of(getActivity(), mFactory).get(StatisticsViewModel.class);
         mViewDataBinding.setStats(mStatisticsViewModel);
     }
 

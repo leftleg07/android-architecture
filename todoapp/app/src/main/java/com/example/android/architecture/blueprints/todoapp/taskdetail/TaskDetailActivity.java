@@ -16,13 +16,11 @@
 
 package com.example.android.architecture.blueprints.todoapp.taskdetail;
 
-import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -33,13 +31,18 @@ import com.example.android.architecture.blueprints.todoapp.addedittask.AddEditTa
 import com.example.android.architecture.blueprints.todoapp.addedittask.AddEditTaskFragment;
 import com.example.android.architecture.blueprints.todoapp.util.ActivityUtils;
 
+import javax.inject.Inject;
+
+import dagger.android.DispatchingAndroidInjector;
+import dagger.android.support.HasSupportFragmentInjector;
+
 import static com.example.android.architecture.blueprints.todoapp.addedittask.AddEditTaskActivity.ADD_EDIT_RESULT_OK;
 import static com.example.android.architecture.blueprints.todoapp.taskdetail.TaskDetailFragment.REQUEST_EDIT_TASK;
 
 /**
  * Displays task details screen.
  */
-public class TaskDetailActivity extends AppCompatActivity implements TaskDetailNavigator {
+public class TaskDetailActivity extends AppCompatActivity implements HasSupportFragmentInjector, TaskDetailNavigator {
 
     public static final String EXTRA_TASK_ID = "TASK_ID";
 
@@ -48,6 +51,13 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskDetailN
     public static final int EDIT_RESULT_OK = RESULT_FIRST_USER + 3;
 
     private TaskDetailViewModel mTaskViewModel;
+
+    @Inject
+    DispatchingAndroidInjector<Fragment> dispatchingAndroidInjector;
+
+    // Use a Factory to inject dependencies into the ViewModel
+    @Inject
+    ViewModelFactory mFactory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +72,7 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskDetailN
         ActivityUtils.replaceFragmentInActivity(getSupportFragmentManager(),
                 taskDetailFragment, R.id.contentFrame);
 
-        mTaskViewModel = obtainViewModel(this);
+        mTaskViewModel = ViewModelProviders.of(this, mFactory).get(TaskDetailViewModel.class);
 
         subscribeToNavigationChanges(mTaskViewModel);
     }
@@ -81,14 +91,6 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskDetailN
         return taskDetailFragment;
     }
 
-    @NonNull
-    public static TaskDetailViewModel obtainViewModel(FragmentActivity activity) {
-        // Use a Factory to inject dependencies into the ViewModel
-        ViewModelFactory factory = ViewModelFactory.getInstance(activity.getApplication());
-
-        return ViewModelProviders.of(activity, factory).get(TaskDetailViewModel.class);
-    }
-
     private void setupToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -99,18 +101,8 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskDetailN
 
     private void subscribeToNavigationChanges(TaskDetailViewModel viewModel) {
         // The activity observes the navigation commands in the ViewModel
-        viewModel.getEditTaskCommand().observe(this, new Observer<Void>() {
-            @Override
-            public void onChanged(@Nullable Void _) {
-                TaskDetailActivity.this.onStartEditTask();
-            }
-        });
-        viewModel.getDeleteTaskCommand().observe(this, new Observer<Void>() {
-            @Override
-            public void onChanged(@Nullable Void _) {
-                TaskDetailActivity.this.onTaskDeleted();
-            }
-        });
+        viewModel.getEditTaskCommand().observe(this, t -> TaskDetailActivity.this.onStartEditTask());
+        viewModel.getDeleteTaskCommand().observe(this, t -> TaskDetailActivity.this.onTaskDeleted());
     }
 
     @Override
@@ -144,6 +136,11 @@ public class TaskDetailActivity extends AppCompatActivity implements TaskDetailN
         Intent intent = new Intent(this, AddEditTaskActivity.class);
         intent.putExtra(AddEditTaskFragment.ARGUMENT_EDIT_TASK_ID, taskId);
         startActivityForResult(intent, REQUEST_EDIT_TASK);
+    }
+
+    @Override
+    public DispatchingAndroidInjector<Fragment> supportFragmentInjector() {
+        return dispatchingAndroidInjector;
     }
 
 }

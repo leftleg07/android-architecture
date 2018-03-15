@@ -16,13 +16,11 @@
 
 package com.example.android.architecture.blueprints.todoapp.tasks;
 
-import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -37,12 +35,24 @@ import com.example.android.architecture.blueprints.todoapp.statistics.Statistics
 import com.example.android.architecture.blueprints.todoapp.taskdetail.TaskDetailActivity;
 import com.example.android.architecture.blueprints.todoapp.util.ActivityUtils;
 
+import javax.inject.Inject;
 
-public class TasksActivity extends AppCompatActivity implements TaskItemNavigator, TasksNavigator {
+import dagger.android.DispatchingAndroidInjector;
+import dagger.android.support.HasSupportFragmentInjector;
+
+
+public class TasksActivity extends AppCompatActivity implements HasSupportFragmentInjector, TaskItemNavigator, TasksNavigator {
 
     private DrawerLayout mDrawerLayout;
 
     private TasksViewModel mViewModel;
+
+    @Inject
+    DispatchingAndroidInjector<Fragment> dispatchingAndroidInjector;
+
+    // Use a Factory to inject dependencies into the ViewModel
+    @Inject
+    ViewModelFactory mFactory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,35 +65,17 @@ public class TasksActivity extends AppCompatActivity implements TaskItemNavigato
 
         setupViewFragment();
 
-        mViewModel = obtainViewModel(this);
+        mViewModel = ViewModelProviders.of(this, mFactory).get(TasksViewModel.class);
 
         // Subscribe to "open task" event
-        mViewModel.getOpenTaskEvent().observe(this, new Observer<String>() {
-            @Override
-            public void onChanged(@Nullable String taskId) {
-                if (taskId != null) {
-                    openTaskDetails(taskId);
-                }
+        mViewModel.getOpenTaskEvent().observe(this, taskId -> {
+            if (taskId != null) {
+                openTaskDetails(taskId);
             }
         });
 
         // Subscribe to "new task" event
-        mViewModel.getNewTaskEvent().observe(this, new Observer<Void>() {
-            @Override
-            public void onChanged(@Nullable Void _) {
-                addNewTask();
-            }
-        });
-    }
-
-    public static TasksViewModel obtainViewModel(FragmentActivity activity) {
-        // Use a Factory to inject dependencies into the ViewModel
-        ViewModelFactory factory = ViewModelFactory.getInstance(activity.getApplication());
-
-        TasksViewModel viewModel =
-                ViewModelProviders.of(activity, factory).get(TasksViewModel.class);
-
-        return viewModel;
+        mViewModel.getNewTaskEvent().observe(this, t -> addNewTask());
     }
 
     private void setupViewFragment() {
@@ -126,28 +118,24 @@ public class TasksActivity extends AppCompatActivity implements TaskItemNavigato
     }
 
     private void setupDrawerContent(NavigationView navigationView) {
-        navigationView.setNavigationItemSelectedListener(
-                new NavigationView.OnNavigationItemSelectedListener() {
-                    @Override
-                    public boolean onNavigationItemSelected(MenuItem menuItem) {
-                        switch (menuItem.getItemId()) {
-                            case R.id.list_navigation_menu_item:
-                                // Do nothing, we're already on that screen
-                                break;
-                            case R.id.statistics_navigation_menu_item:
-                                Intent intent =
-                                        new Intent(TasksActivity.this, StatisticsActivity.class);
-                                startActivity(intent);
-                                break;
-                            default:
-                                break;
-                        }
-                        // Close the navigation drawer when an item is selected.
-                        menuItem.setChecked(true);
-                        mDrawerLayout.closeDrawers();
-                        return true;
-                    }
-                });
+        navigationView.setNavigationItemSelectedListener(menuItem -> {
+            switch (menuItem.getItemId()) {
+                case R.id.list_navigation_menu_item:
+                    // Do nothing, we're already on that screen
+                    break;
+                case R.id.statistics_navigation_menu_item:
+                    Intent intent =
+                            new Intent(TasksActivity.this, StatisticsActivity.class);
+                    startActivity(intent);
+                    break;
+                default:
+                    break;
+            }
+            // Close the navigation drawer when an item is selected.
+            menuItem.setChecked(true);
+            mDrawerLayout.closeDrawers();
+            return true;
+        });
     }
 
     @Override
@@ -167,5 +155,10 @@ public class TasksActivity extends AppCompatActivity implements TaskItemNavigato
     public void addNewTask() {
         Intent intent = new Intent(this, AddEditTaskActivity.class);
         startActivityForResult(intent, AddEditTaskActivity.REQUEST_CODE);
+    }
+
+    @Override
+    public DispatchingAndroidInjector<Fragment> supportFragmentInjector() {
+        return dispatchingAndroidInjector;
     }
 }

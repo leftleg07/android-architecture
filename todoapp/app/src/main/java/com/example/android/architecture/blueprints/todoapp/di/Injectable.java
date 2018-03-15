@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,10 @@
  * limitations under the License.
  */
 
-package com.example.android.architecture.blueprints.todoapp.data.source.local;
-
-import android.arch.persistence.room.Database;
-import android.arch.persistence.room.RoomDatabase;
-
-import com.example.android.architecture.blueprints.todoapp.data.Task;
-
-import javax.inject.Singleton;
+package com.example.android.architecture.blueprints.todoapp.di;
 
 /**
- * The Room Database that contains the Task table.
+ * Marks an activity / fragment injectable.
  */
-@Singleton
-@Database(entities = {Task.class}, version = 1)
-public abstract class ToDoDatabase extends RoomDatabase {
-    public abstract TasksDao taskDao();
+public interface Injectable {
 }
