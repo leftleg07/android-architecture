@@ -26,23 +26,18 @@ import com.example.android.architecture.blueprints.todoapp.statistics.Statistics
 import com.example.android.architecture.blueprints.todoapp.taskdetail.TaskDetailViewModel;
 import com.example.android.architecture.blueprints.todoapp.tasks.TasksViewModel;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 /**
  * A creator is used to inject the product ID into the ViewModel
  * <p>
  * This creator is to showcase how to inject dependencies into ViewModels. It's not
  * actually necessary in this case, as the product ID can be passed in a public method.
  */
-@Singleton
 public class ViewModelFactory extends ViewModelProvider.NewInstanceFactory {
 
     private final Application mApplication;
 
     private final TasksRepository mTasksRepository;
 
-    @Inject
     public ViewModelFactory(Application application, TasksRepository repository) {
         mApplication = application;
         mTasksRepository = repository;

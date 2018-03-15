@@ -17,44 +17,24 @@
 package com.example.android.architecture.blueprints.todoapp.di;
 
 
-import android.app.Application;
-import android.content.Context;
-import android.support.annotation.NonNull;
-
 import com.example.android.architecture.blueprints.todoapp.data.source.TasksDataSource;
-import com.example.android.architecture.blueprints.todoapp.data.source.TasksRepository;
-import com.example.android.architecture.blueprints.todoapp.data.source.local.TasksLocalDataSource;
-import com.example.android.architecture.blueprints.todoapp.data.source.local.ToDoDatabase;
 import com.example.android.architecture.blueprints.todoapp.data.source.remote.TasksRemoteDataSource;
-import com.example.android.architecture.blueprints.todoapp.util.AppExecutors;
 
 import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
  * Enables injection of production implementations for
  * {@link TasksDataSource} at compile time.
  */
-@Module(includes = ViewModelModule.class)
-class AppModule {
-
-
-    @Provides
-    public Context provideApplication(Application application) {
-        return application;
-    }
+@Module
+class TasksRemoteDataSourceModule {
 
     @Singleton
     @Provides
-    TasksRepository provideTasksRepository(@NonNull Context context) {
-        checkNotNull(context);
-        ToDoDatabase database = ToDoDatabase.getInstance(context);
-        return TasksRepository.getInstance(TasksRemoteDataSource.getInstance(),
-                TasksLocalDataSource.getInstance(new AppExecutors(),
-                        database.taskDao()));
+    TasksDataSource provideTasksRemoteDataSource() {
+        return new TasksRemoteDataSource();
     }
 }

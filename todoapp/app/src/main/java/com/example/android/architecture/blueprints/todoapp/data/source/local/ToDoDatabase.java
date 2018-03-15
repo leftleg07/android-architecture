@@ -21,12 +21,9 @@ import android.arch.persistence.room.RoomDatabase;
 
 import com.example.android.architecture.blueprints.todoapp.data.Task;
 
-import javax.inject.Singleton;
-
 /**
  * The Room Database that contains the Task table.
  */
-@Singleton
 @Database(entities = {Task.class}, version = 1)
 public abstract class ToDoDatabase extends RoomDatabase {
     public abstract TasksDao taskDao();

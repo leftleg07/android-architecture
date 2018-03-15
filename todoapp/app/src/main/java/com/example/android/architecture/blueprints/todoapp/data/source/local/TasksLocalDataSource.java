@@ -16,10 +16,7 @@
 
 package com.example.android.architecture.blueprints.todoapp.data.source.local;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import android.support.annotation.NonNull;
-import android.support.annotation.VisibleForTesting;
 
 import com.example.android.architecture.blueprints.todoapp.data.Task;
 import com.example.android.architecture.blueprints.todoapp.data.source.TasksDataSource;
@@ -27,35 +24,23 @@ import com.example.android.architecture.blueprints.todoapp.util.AppExecutors;
 
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 
 /**
  * Concrete implementation of a data source as a db.
  */
 public class TasksLocalDataSource implements TasksDataSource {
 
-    private static volatile TasksLocalDataSource INSTANCE;
-
     private TasksDao mTasksDao;
 
     private AppExecutors mAppExecutors;
 
     // Prevent direct instantiation.
-    private TasksLocalDataSource(@NonNull AppExecutors appExecutors,
+    public TasksLocalDataSource(@NonNull AppExecutors appExecutors,
                                  @NonNull TasksDao tasksDao) {
         mAppExecutors = appExecutors;
         mTasksDao = tasksDao;
-    }
-
-    public static TasksLocalDataSource getInstance(@NonNull AppExecutors appExecutors,
-                                                   @NonNull TasksDao tasksDao) {
-        if (INSTANCE == null) {
-            synchronized (TasksLocalDataSource.class) {
-                if (INSTANCE == null) {
-                    INSTANCE = new TasksLocalDataSource(appExecutors, tasksDao);
-                }
-            }
-        }
-        return INSTANCE;
     }
 
     /**
@@ -145,10 +130,5 @@ public class TasksLocalDataSource implements TasksDataSource {
     @Override
     public void deleteTask(@NonNull String taskId) {
         mAppExecutors.diskIO().execute(() -> mTasksDao.deleteTaskById(taskId));
-    }
-
-    @VisibleForTesting
-    static void clearInstance() {
-        INSTANCE = null;
     }
 }

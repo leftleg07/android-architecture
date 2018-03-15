@@ -19,10 +19,6 @@ package com.example.android.architecture.blueprints.todoapp.di;
 
 import com.example.android.architecture.blueprints.todoapp.data.FakeTasksRemoteDataSource;
 import com.example.android.architecture.blueprints.todoapp.data.source.TasksDataSource;
-import com.example.android.architecture.blueprints.todoapp.data.source.TasksRepository;
-import com.example.android.architecture.blueprints.todoapp.data.source.local.TasksLocalDataSource;
-import com.example.android.architecture.blueprints.todoapp.data.source.local.ToDoDatabase;
-import com.example.android.architecture.blueprints.todoapp.util.AppExecutors;
 
 import javax.inject.Singleton;
 
@@ -35,13 +31,13 @@ import dagger.Provides;
  * a fake instance of the class to isolate the dependencies and run a test hermetically.
  */
 @Module
-class ViewModelFactoryModule {
+class TasksRemoteDataSourceModule {
 
     @Singleton
     @Provides
-    TasksRepository provideTasksRepository(ToDoDatabase database) {
-        return TasksRepository.getInstance(FakeTasksRemoteDataSource.getInstance(),
-                TasksLocalDataSource.getInstance(new AppExecutors(),
-                        database.taskDao()));
+    TasksDataSource provideTasksRemoteDataSource() {
+        return new FakeTasksRemoteDataSource();
     }
+
+
 }

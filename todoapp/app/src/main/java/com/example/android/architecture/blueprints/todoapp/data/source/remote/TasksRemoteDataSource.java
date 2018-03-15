@@ -32,7 +32,6 @@ import java.util.Map;
  */
 public class TasksRemoteDataSource implements TasksDataSource {
 
-    private static TasksRemoteDataSource INSTANCE;
 
     private static final int SERVICE_LATENCY_IN_MILLIS = 2000;
 
@@ -58,15 +57,6 @@ public class TasksRemoteDataSource implements TasksDataSource {
         addTask("Finish bridge in Tacoma", "Found awesome girders at half the cost!", "18");
     }
 
-    public static TasksRemoteDataSource getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new TasksRemoteDataSource();
-        }
-        return INSTANCE;
-    }
-
-    // Prevent direct instantiation.
-    private TasksRemoteDataSource() {}
 
     private static void addTask(String title, String description, String id) {
         Task newTask = new Task(title, description, id);

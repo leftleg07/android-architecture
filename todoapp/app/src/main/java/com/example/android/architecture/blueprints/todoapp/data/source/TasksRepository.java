@@ -41,8 +41,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class TasksRepository implements TasksDataSource {
 
-    private volatile static TasksRepository INSTANCE = null;
-
     private final TasksDataSource mTasksRemoteDataSource;
 
     private final TasksDataSource mTasksLocalDataSource;
@@ -58,39 +56,18 @@ public class TasksRepository implements TasksDataSource {
      */
     private boolean mCacheIsDirty = false;
 
-    // Prevent direct instantiation.
-    private TasksRepository(@NonNull TasksDataSource tasksRemoteDataSource,
+    /**
+     * Returns the instance of this class, creating it if necessary.
+     *
+     * @param tasksRemoteDataSource the backend data source
+     * @param tasksLocalDataSource  the device storage data source
+     */
+    public TasksRepository(@NonNull TasksDataSource tasksRemoteDataSource,
                             @NonNull TasksDataSource tasksLocalDataSource) {
         mTasksRemoteDataSource = checkNotNull(tasksRemoteDataSource);
         mTasksLocalDataSource = checkNotNull(tasksLocalDataSource);
     }
 
-    /**
-     * Returns the single instance of this class, creating it if necessary.
-     *
-     * @param tasksRemoteDataSource the backend data source
-     * @param tasksLocalDataSource  the device storage data source
-     * @return the {@link TasksRepository} instance
-     */
-    public static TasksRepository getInstance(TasksDataSource tasksRemoteDataSource,
-                                              TasksDataSource tasksLocalDataSource) {
-        if (INSTANCE == null) {
-            synchronized (TasksRepository.class) {
-                if (INSTANCE == null) {
-                    INSTANCE = new TasksRepository(tasksRemoteDataSource, tasksLocalDataSource);
-                }
-            }
-        }
-        return INSTANCE;
-    }
-
-    /**
-     * Used to force {@link #getInstance(TasksDataSource, TasksDataSource)} to create a new instance
-     * next time it's called.
-     */
-    public static void destroyInstance() {
-        INSTANCE = null;
-    }
 
     /**
      * Gets tasks from cache, local data source (SQLite) or remote data source, whichever is
