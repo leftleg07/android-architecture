@@ -5,12 +5,9 @@ import com.example.android.architecture.blueprints.todoapp.data.Task;
 import com.example.android.architecture.blueprints.todoapp.data.source.TasksDataSource;
 import com.example.android.architecture.blueprints.todoapp.util.SingleExecutors;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 
@@ -21,7 +18,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -47,13 +43,7 @@ public class TasksLocalDataSourceTest {
         mTasksDao = mock(TasksDao.class);
 
         // Make sure that we're not keeping a reference to the wrong instance.
-        TasksLocalDataSource.clearInstance();
-        mLocalDataSource = TasksLocalDataSource.getInstance(new SingleExecutors(), mTasksDao);
-    }
-
-    @After
-    public void cleanUp() {
-        TasksLocalDataSource.clearInstance();
+        mLocalDataSource = new TasksLocalDataSource(new SingleExecutors(), mTasksDao);
     }
 
     @Test

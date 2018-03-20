@@ -33,11 +33,11 @@ import dagger.Provides;
 @Module
 class TasksRemoteDataSourceModule {
 
+    @ForRemote
     @Singleton
     @Provides
-    TasksDataSource provideTasksRemoteDataSource() {
+    public TasksDataSource provideTasksRemoteDataSource() {
         return new FakeTasksRemoteDataSource();
     }
-
 
 }

@@ -32,7 +32,6 @@ import dagger.android.AndroidInjectionModule;
         AppModule.class,
         ActivityBuilderModule.class,
         FragmentBuilderModule.class,
-        TasksRemoteDataSourceModule.class,
 })
 public interface AppComponent {
     void inject(TodoApp app);

@@ -16,7 +16,7 @@ import javax.inject.Singleton;
 import dagger.Module;
 import dagger.Provides;
 
-@Module
+@Module(includes = TasksRemoteDataSourceModule.class)
 class AppModule {
     @Provides
     Context provideApplication(Application application) {
@@ -26,13 +26,20 @@ class AppModule {
     @Singleton
     @Provides
     ToDoDatabase provideDatabase(Application application) {
-        return Room.databaseBuilder(application, ToDoDatabase.class,"Tasks.db").build();
+        return Room.databaseBuilder(application, ToDoDatabase.class, "Tasks.db").build();
+    }
+
+    @ForLocal
+    @Singleton
+    @Provides
+    TasksDataSource provideTasksLocalDataSource(ToDoDatabase database) {
+        return new TasksLocalDataSource(new AppExecutors(), database.taskDao());
     }
 
     @Singleton
     @Provides
-    TasksRepository provideTasksRepository(ToDoDatabase database, TasksDataSource tasksRemoteDataSource) {
-        return new TasksRepository(tasksRemoteDataSource, new TasksLocalDataSource(new AppExecutors(), database.taskDao()));
+    TasksRepository provideTasksRepository(@ForRemote TasksDataSource tasksRemoteDataSource, @ForLocal TasksDataSource tasksLocalDataSource) {
+        return new TasksRepository(tasksRemoteDataSource, tasksLocalDataSource);
     }
 
     @Singleton

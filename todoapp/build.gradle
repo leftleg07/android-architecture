@@ -26,6 +26,10 @@ task clean(type: Delete) {
 
 // Define versions in a single place
 ext {
+    // app version
+    versionCode = 1
+    versionName = '0.0.1'
+
     // Sdk and tools
     // Support library and architecture components support minSdk 14 and above.
     minSdkVersion = 14

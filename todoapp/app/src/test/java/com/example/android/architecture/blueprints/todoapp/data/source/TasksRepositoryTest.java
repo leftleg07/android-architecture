@@ -16,12 +16,9 @@
 
 package com.example.android.architecture.blueprints.todoapp.data.source;
 
-import android.content.Context;
-
 import com.example.android.architecture.blueprints.todoapp.data.Task;
 import com.google.common.collect.Lists;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -81,13 +78,8 @@ public class TasksRepositoryTest {
         MockitoAnnotations.initMocks(this);
 
         // Get a reference to the class under test
-        mTasksRepository = TasksRepository.getInstance(
+        mTasksRepository = new TasksRepository(
                 mTasksRemoteDataSource, mTasksLocalDataSource);
-    }
-
-    @After
-    public void destroyRepositoryInstance() {
-        TasksRepository.destroyInstance();
     }
 
     @Test
